@@ -48,7 +48,6 @@ export const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
   const [components, setComponents] = useState<Component[]>(initialComponents);
   const [selectedComponent, setSelectedComponent] = useState<Component | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState('');
   const [editUnit, setEditUnit] = useState('');
   const [isDrawingWire, setIsDrawingWire] = useState(false);
@@ -498,7 +497,6 @@ export const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
       } else {
         setSelectedComponent(clickedComponent);
         setIsDragging(true);
-        setIsEditing(true);
         setEditValue(clickedComponent.value.toString());
         setEditUnit(clickedComponent.unit);
       }
@@ -506,7 +504,6 @@ export const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
       setIsSelecting(true);
       setSelectionBox({ startX: x, startY: y, endX: x, endY: y });
       setSelectedComponent(null);
-      setIsEditing(false);
     }
   };
 
@@ -549,7 +546,6 @@ export const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
     setComponents(components.filter(component => !selectedComponents.has(component.id)));
     setSelectedComponents(new Set());
     setSelectedComponent(null);
-    setIsEditing(false);
   };
 
   const handleComponentEdit = () => {
@@ -564,7 +560,6 @@ export const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
           }
         : component
     ));
-    setIsEditing(false);
   };
 
   const handleDeleteComponent = () => {
@@ -572,7 +567,6 @@ export const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
 
     setComponents(components.filter(component => component.id !== selectedComponent.id));
     setSelectedComponent(null);
-    setIsEditing(false);
   };
 
   const handleAddComponent = (type: Component['type']) => {

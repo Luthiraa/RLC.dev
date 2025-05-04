@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Editor from '@monaco-editor/react';
 
 interface TestCase {
-  input: string | number | boolean | Array<any> | Record<string, unknown>;
+  input: string | number | boolean | Array<unknown> | Record<string, unknown>;
   output: string | number | boolean;
   description?: string;
 }
@@ -93,7 +93,6 @@ int main() {
   const [output, setOutput] = useState<string>('');
   const [isCompiling, setIsCompiling] = useState(false);
   const [error, setError] = useState<string>('');
-  const [currentTestCase, setCurrentTestCase] = useState(0);
 
   const handleEditorChange = (value: string | undefined) => {
     if (value) {

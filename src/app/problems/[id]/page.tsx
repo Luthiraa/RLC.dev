@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, use, useEffect } from 'react';
+import { useState, use } from 'react';
 import Link from 'next/link';
 import { problems } from '@/data/problems';
 import SpiceSimulator from '@/components/SpiceSimulator';
