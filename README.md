@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Engineering Learning Platform
 
 A platform for learning and practicing engineering concepts with interactive problems and real-time feedback.
@@ -174,3 +175,6 @@ The questions are stored in a SQLite database (`mcq_database.db`) with the follo
 ## Disclaimer
 
 This scraper is for educational purposes only. Please respect the website's terms of service and robots.txt file when using this script.
+=======
+RLC.dev 
+>>>>>>> 9baefb24b1373635bd2dd2560960c6b24f455c8f
