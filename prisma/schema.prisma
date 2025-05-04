@@ -1,0 +1,58 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  password      String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  problems      Problem[] @relation("UserProblems")
+  solutions     Solution[]
+  progress      Progress[]
+}
+
+model Problem {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  difficulty  String   // "EASY", "MEDIUM", "HARD"
+  category    String   // "CONTROL_SYSTEMS", "EMBEDDED_SYSTEMS", etc.
+  testCases   Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]   @relation("UserProblems")
+  solutions   Solution[]
+}
+
+model Solution {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    String
+  problemId String
+  user      User     @relation(fields: [userId], references: [id])
+  problem   Problem  @relation(fields: [problemId], references: [id])
+  votes     Int      @default(0)
+}
+
+model Progress {
+  id        String   @id @default(cuid())
+  userId    String
+  category  String
+  completed Int      @default(0)
+  total     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+} 
