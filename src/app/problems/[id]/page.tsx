@@ -1,10 +1,17 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { useState, use, useEffect } from 'react';
 import Link from 'next/link';
 import { problems } from '@/data/problems';
 import SpiceSimulator from '@/components/SpiceSimulator';
 import CodeEditor from '@/components/CodeEditor';
+
+interface SimulationResults {
+  nodes: Record<string, number>;
+  currents: Record<string, number>;
+  voltages: Record<string, number>;
+  power: Record<string, number>;
+}
 
 export default function ProblemPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = use(params);
@@ -22,7 +29,7 @@ export default function ProblemPage({ params }: { params: Promise<{ id: string }
     console.log('Submitting solution:', code);
   };
 
-  const handleSimulationComplete = (results: any) => {
+  const handleSimulationComplete = (results: SimulationResults) => {
     console.log('Simulation results:', results);
     // Handle simulation results
   };
@@ -97,37 +104,52 @@ export default function ProblemPage({ params }: { params: Promise<{ id: string }
                 initialComponents={[
                   {
                     id: 'v1',
-                    type: 'voltage_source',
+                    type: 'voltageSource',
                     value: 5,
-                    position: { x: 100, y: 300 },
+                    x: 100,
+                    y: 300,
+                    unit: 'V',
+                    rotation: 0,
                     connections: ['r1'],
                   },
                   {
                     id: 'r1',
                     type: 'resistor',
                     value: 100,
-                    position: { x: 200, y: 300 },
+                    x: 200,
+                    y: 300,
+                    unit: 'Ω',
+                    rotation: 0,
                     connections: ['v1', 'c1'],
                   },
                   {
                     id: 'c1',
                     type: 'capacitor',
                     value: 0.001,
-                    position: { x: 300, y: 300 },
+                    x: 300,
+                    y: 300,
+                    unit: 'F',
+                    rotation: 0,
                     connections: ['r1', 'l1'],
                   },
                   {
                     id: 'l1',
                     type: 'inductor',
                     value: 0.1,
-                    position: { x: 400, y: 300 },
+                    x: 400,
+                    y: 300,
+                    unit: 'H',
+                    rotation: 0,
                     connections: ['c1', 'gnd'],
                   },
                   {
                     id: 'gnd',
                     type: 'ground',
                     value: 0,
-                    position: { x: 500, y: 300 },
+                    x: 500,
+                    y: 300,
+                    unit: '',
+                    rotation: 0,
                     connections: ['l1'],
                   },
                 ]}
@@ -142,7 +164,10 @@ export default function ProblemPage({ params }: { params: Promise<{ id: string }
                 functionName={problem.functionName || 'solution'}
                 parameters={problem.parameters || ['input']}
                 returnType={problem.returnType || 'int'}
-                testCases={problem.testCases}
+                testCases={problem.testCases.map(tc => ({
+                  input: tc.input,
+                  output: typeof tc.output === 'object' ? JSON.stringify(tc.output) : tc.output
+                }))}
               />
             )}
           </div>
@@ -150,4 +175,4 @@ export default function ProblemPage({ params }: { params: Promise<{ id: string }
       </div>
     </div>
   );
-} 
+}

@@ -1,7 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Editor from '@monaco-editor/react';
+
+interface TestCase {
+  input: string | number | boolean | Array<any> | Record<string, unknown>;
+  output: string | number | boolean;
+  description?: string;
+}
 
 interface CodeEditorProps {
   initialCode?: string;
@@ -11,11 +17,7 @@ interface CodeEditorProps {
   functionName?: string;
   parameters?: string[];
   returnType?: string;
-  testCases?: Array<{
-    input: any;
-    output: any;
-    description?: string;
-  }>;
+  testCases?: TestCase[];
 }
 
 export default function CodeEditor({
@@ -28,13 +30,13 @@ export default function CodeEditor({
   returnType = 'int',
   testCases = [],
 }: CodeEditorProps) {
-  const generateTestCode = (testCase: any) => {
+  const generateTestCode = (testCase: TestCase | undefined) => {
     if (!testCase) return '';
     
     // Handle different input types
     let inputStr: string;
     if (Array.isArray(testCase.input)) {
-      inputStr = testCase.input.map((param: any) => {
+      inputStr = testCase.input.map((param: unknown) => {
         if (Array.isArray(param)) {
           return `{${param.join(', ')}}`;
         }
@@ -42,7 +44,7 @@ export default function CodeEditor({
       }).join(', ');
     } else if (typeof testCase.input === 'object' && testCase.input !== null) {
       // Handle object inputs
-      inputStr = Object.entries(testCase.input)
+      inputStr = Object.entries(testCase.input as Record<string, unknown>)
         .map(([key, value]) => {
           if (Array.isArray(value)) {
             return `${key}: {${value.join(', ')}}`;
@@ -161,15 +163,11 @@ int main() {
             minimap: { enabled: false },
             fontSize: 14,
             lineNumbers: 'on',
-            scrollBeyond: false,
             automaticLayout: true,
             tabSize: 4,
             insertSpaces: true,
             wordWrap: 'on',
             renderWhitespace: 'selection',
-            bracketPairColorization: {
-              enabled: true,
-            },
           }}
         />
       </div>
@@ -186,4 +184,4 @@ int main() {
       )}
     </div>
   );
-} 
+}

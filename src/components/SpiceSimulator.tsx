@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 
 interface Node {
   x: number;
@@ -21,9 +21,16 @@ interface Component {
   nodes?: Node[]; // For component connection points
 }
 
+interface SimulationResults {
+  nodes: Record<string, number>;
+  currents: Record<string, number>;
+  voltages: Record<string, number>;
+  power: Record<string, number>;
+}
+
 interface SpiceSimulatorProps {
   initialComponents?: Component[];
-  onSimulationComplete?: (results: any) => void;
+  onSimulationComplete?: (results: SimulationResults) => void;
 }
 
 interface SelectionBox {
@@ -33,7 +40,7 @@ interface SelectionBox {
   endY: number;
 }
 
-const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
+export const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
   initialComponents = [],
   onSimulationComplete,
 }) => {
@@ -59,46 +66,7 @@ const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
   const [selectionBox, setSelectionBox] = useState<SelectionBox | null>(null);
   const [selectedComponents, setSelectedComponents] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    // Set canvas size to be more compact
-    canvas.width = 600;
-    canvas.height = 400;
-
-    // Draw grid
-    drawGrid(ctx);
-
-    // Draw components
-    components.forEach(component => drawComponent(ctx, component));
-  }, [components]);
-
-  const drawGrid = (ctx: CanvasRenderingContext2D) => {
-    ctx.strokeStyle = '#e0e0e0';
-    ctx.lineWidth = 1;
-
-    // Draw vertical lines
-    for (let x = 0; x < 600; x += 20) {
-      ctx.beginPath();
-      ctx.moveTo(x, 0);
-      ctx.lineTo(x, 400);
-      ctx.stroke();
-    }
-
-    // Draw horizontal lines
-    for (let y = 0; y < 400; y += 20) {
-      ctx.beginPath();
-      ctx.moveTo(0, y);
-      ctx.lineTo(600, y);
-      ctx.stroke();
-    }
-  };
-
-  const drawComponent = (ctx: CanvasRenderingContext2D, component: Component) => {
+  const drawComponent = useCallback((ctx: CanvasRenderingContext2D, component: Component) => {
     ctx.save();
     ctx.translate(component.x, component.y);
     ctx.rotate(component.rotation);
@@ -136,6 +104,56 @@ const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
     }
 
     ctx.restore();
+  }, [selectedComponent]);
+
+  // Move drawComponents definition before its usage
+  const drawComponents = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    components.forEach(component => drawComponent(ctx, component));
+  }, [components, drawComponent]);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Set canvas size to be more compact
+    canvas.width = 600;
+    canvas.height = 400;
+
+    // Draw grid
+    drawGrid(ctx);
+
+    // Draw components
+    drawComponents();
+  }, [components, drawComponents]);
+
+  const drawGrid = (ctx: CanvasRenderingContext2D) => {
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.lineWidth = 1;
+
+    // Draw vertical lines
+    for (let x = 0; x < 600; x += 20) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, 400);
+      ctx.stroke();
+    }
+
+    // Draw horizontal lines
+    for (let y = 0; y < 400; y += 20) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(600, y);
+      ctx.stroke();
+    }
   };
 
   const drawResistor = (ctx: CanvasRenderingContext2D, value: number, unit: string) => {
@@ -425,7 +443,7 @@ const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
 
     // Draw selection box
     drawSelectionBox(ctx);
-  }, [components, selectionBox, selectedComponents]);
+  }, [components, selectedComponents, selectionBox, drawComponent, drawSelectionBox]);
 
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
@@ -595,7 +613,7 @@ const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
 
   const runSimulation = () => {
     // Basic circuit analysis
-    const results = {
+    const results: SimulationResults = {
       nodes: {},
       currents: {},
       voltages: {},
@@ -788,4 +806,4 @@ const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
   );
 };
 
-export default SpiceSimulator; 
+export default SpiceSimulator;

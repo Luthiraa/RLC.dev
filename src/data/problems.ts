@@ -1,13 +1,44 @@
+export interface TestCase {
+  input: {
+    kp?: number;
+    ki?: number;
+    kd?: number;
+    setpoint?: number;
+    current_value?: number;
+    R?: number;
+    L?: number;
+    C?: number;
+    cutoff_freq?: number;
+    sample_rate?: number;
+    input_signal?: number[];
+    vector?: number;
+    priority?: number;
+    handler?: string;
+    data_rate?: number;
+    modulation_type?: string;
+    data?: number[];
+    resolution?: string;
+    refresh_rate?: number;
+  };
+  output: number | string | number[] | {
+    natural_frequency?: number;
+    damping_ratio?: number;
+    pixel_clock?: number;
+    h_sync?: number;
+    v_sync?: number;
+  };
+}
+
 export interface Problem {
   id: number;
   title: string;
   category: string;
   difficulty: 'Easy' | 'Medium' | 'Hard';
   description: string;
-  testCases: {
-    input: any;
-    output: any;
-  }[];
+  testCases: TestCase[];
+  functionName?: string;
+  parameters?: string[];
+  returnType?: string;
 }
 
 export const problems: Problem[] = [
@@ -302,4 +333,4 @@ class TimingController:
       },
     ],
   },
-]; 
+];
