@@ -65,6 +65,26 @@ export const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
   const [selectionBox, setSelectionBox] = useState<SelectionBox | null>(null);
   const [selectedComponents, setSelectedComponents] = useState<Set<string>>(new Set());
 
+  const drawNodes = useCallback((ctx: CanvasRenderingContext2D, component: Component) => {
+    ctx.save();
+    ctx.fillStyle = '#2563eb';
+    ctx.strokeStyle = '#fff';
+    ctx.lineWidth = 1;
+
+    // Calculate node positions based on component type and rotation
+    const nodes = getComponentNodes(component);
+    component.nodes = nodes;
+
+    nodes.forEach(node => {
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    });
+
+    ctx.restore();
+  }, []);
+
   const drawComponent = useCallback((ctx: CanvasRenderingContext2D, component: Component) => {
     ctx.save();
     ctx.translate(component.x, component.y);
@@ -103,7 +123,7 @@ export const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
     }
 
     ctx.restore();
-  }, [selectedComponent]);
+  }, [selectedComponent, drawNodes]);
 
   // Move drawComponents definition before its usage
   const drawComponents = useCallback(() => {
@@ -302,26 +322,6 @@ export const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
     ctx.stroke();
   };
 
-  const drawNodes = (ctx: CanvasRenderingContext2D, component: Component) => {
-    ctx.save();
-    ctx.fillStyle = '#2563eb';
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 1;
-
-    // Calculate node positions based on component type and rotation
-    const nodes = getComponentNodes(component);
-    component.nodes = nodes;
-
-    nodes.forEach(node => {
-      ctx.beginPath();
-      ctx.arc(node.x, node.y, 4, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-    });
-
-    ctx.restore();
-  };
-
   const getComponentNodes = (component: Component): Node[] => {
     const nodes: Node[] = [];
     const rotation = component.rotation;
@@ -366,7 +366,7 @@ export const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
     }));
   };
 
-  const drawSelectionBox = (ctx: CanvasRenderingContext2D) => {
+  const drawSelectionBox = useCallback((ctx: CanvasRenderingContext2D) => {
     if (!selectionBox) return;
 
     ctx.save();
@@ -385,7 +385,7 @@ export const SpiceSimulator: React.FC<SpiceSimulatorProps> = ({
     );
 
     ctx.restore();
-  };
+  }, [selectionBox]);
 
   const updateSelection = () => {
     if (!selectionBox) return;
